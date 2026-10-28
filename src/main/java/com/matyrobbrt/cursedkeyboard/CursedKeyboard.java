@@ -11,8 +11,12 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.gui.ConfigurationScreen;
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.common.NeoForge;
 import org.slf4j.Logger;
 
@@ -26,9 +30,19 @@ import java.util.stream.Stream;
 public class CursedKeyboard {
     public static final String MODID = "cursedkeyboard";
     public static final Logger LOGGER = LogUtils.getLogger();
-    private static final int SWAP_INTERVAL = 20 * 60 * 5; // 5 minutes
+    private static final ModConfigSpec SPEC;
+    private static final ModConfigSpec.IntValue MINIMUM_CURSE_INTERVAL, MAX_CURSES;
+
+    static {
+        var builder = new ModConfigSpec.Builder();
+        MINIMUM_CURSE_INTERVAL = builder.comment("The minimum amount of seconds that must pass before keymappings can be cursed again.")
+                .defineInRange("minimum_curse_interval", 60 * 20, 1, Integer.MAX_VALUE / 2); // 20 minutes
+        MAX_CURSES = builder.comment("The maximum amount of active keybind curses")
+                .defineInRange("max_curses", 1, 1, 50);
+        SPEC = builder.build();
+    }
+
     private static final float INCREASING_CHANCE = 0.0001f; // 0.2% per second
-    private static final int MAX_ACTIVE = 1;
 
     public static final Tooltip CANNOT_CHANGE = Tooltip.create(Component.translatable("message.cursedkeyboard.cannot_change_keybind"));
 
@@ -36,6 +50,9 @@ public class CursedKeyboard {
         modEventBus.addListener((final FMLClientSetupEvent _) -> CursedKeybinds.load());
 
         NeoForge.EVENT_BUS.addListener(this::onTick);
+
+        modContainer.registerConfig(ModConfig.Type.CLIENT, SPEC);
+        modContainer.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
     }
 
     private int counter;
@@ -44,7 +61,9 @@ public class CursedKeyboard {
         if (minecraft.level == null) return;
         counter++;
 
-        if (counter > SWAP_INTERVAL && (counter - SWAP_INTERVAL) * INCREASING_CHANCE + minecraft.level.getRandom().nextFloat() > 0.95f) {
+        var tickRate = minecraft.level.tickRateManager().tickrate();
+
+        if (counter > tickRate * MINIMUM_CURSE_INTERVAL.getAsInt() && (counter - tickRate * MINIMUM_CURSE_INTERVAL.getAsInt()) * INCREASING_CHANCE + minecraft.level.getRandom().nextFloat() > 0.95f) {
             counter = 0;
             var keybinds = minecraft.options.keyMappings;
 
@@ -67,7 +86,7 @@ public class CursedKeyboard {
                     .toList();
 
             List<CursedKeybinds.ChangedKeybind> reversed = new ArrayList<>();
-            while (CursedKeybinds.getChangesCount() >= MAX_ACTIVE) {
+            while (CursedKeybinds.getChangesCount() >= MAX_CURSES.getAsInt()) {
                 var first = CursedKeybinds.removeFirst();
                 reversed.addAll(first.changed());
                 first.reverse();

@@ -20,7 +20,7 @@ public class CursedKeybinds {
     private static final Path STORAGE_PATH = Path.of("cursed_keybinds.json");
     private static List<KeybindSwap> changes = List.of();
 
-    public static boolean isAffected(KeyMapping mapping) {
+    public static boolean isCursed(KeyMapping mapping) {
         for (KeybindSwap change : changes) {
             for (ChangedKeybind changedKeybind : change.changed) {
                 if (changedKeybind.name.equals(mapping.getName())) {

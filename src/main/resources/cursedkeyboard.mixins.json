@@ -3,7 +3,8 @@
   "package": "com.matyrobbrt.cursedkeyboard.mixin",
   "compatibilityLevel": "JAVA_25",
   "client": [
-    "KeyEntryMixin"
+    "KeyEntryMixin",
+    "KeyBindsScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1
