@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "package": "com.matyrobbrt.cursedkeyboard.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "client": [
+    "KeyEntryMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}

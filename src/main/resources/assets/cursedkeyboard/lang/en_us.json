@@ -1,0 +1,6 @@
+{
+  "message.cursedkeyboard.is_now": "%s is now %s",
+  "message.cursedkeyboard.your_keyboards_cursed": "Oh. Would you look at that! Your keyboard has been cursed (again...): %s",
+  "message.cursedkeyboard.curse_reverse": "Lucky you. The following keybinds have been reversed to their usual keys... for now at least...: %s",
+  "message.cursedkeyboard.cannot_change_keybind": "This keybind is cursed! You can't change it for now."
+}
